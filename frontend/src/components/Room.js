@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Grid, Button, Typography } from "@material-ui/core";
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer";
+import SearchBar from "./SearchBar";
 
 function Room({ leaveRoomCallback }) {
     const { roomCode } = useParams();
@@ -128,21 +129,7 @@ function Room({ leaveRoomCallback }) {
                     Code: {roomCode}
                 </Typography>
             </Grid>
-            {/* <Grid item xs={12} align="center">
-                <Typography variant="h6" component="h6">
-                    Votes: {roomData.votesToSkip}
-                </Typography>
-            </Grid>
-            <Grid item xs={12} align="center">
-                <Typography variant="h6" component="h6">
-                    Guest can pause: {roomData.guestCanPause + ""}
-                </Typography>
-            </Grid>
-            <Grid item xs={12} align="center">
-                <Typography variant="h6" component="h6">
-                    Host: {roomData.isHost + ""}
-                </Typography>
-            </Grid> */}
+            <SearchBar />
             <MusicPlayer {...song} />
             {roomData.isHost ? renderSettingsButton() : null}
             <Grid item xs={12} align="center">

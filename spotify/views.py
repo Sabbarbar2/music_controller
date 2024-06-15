@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .util import *
 from api.models import Room
 from .models import Vote
+from django.http import JsonResponse
 
 class AuthURL(APIView):
     def get(self, request, format=None):
@@ -175,3 +176,41 @@ class SkipSong(APIView):
             vote.save()
         
         return Response({}, status=status.HTTP_204_NO_CONTENT)
+    
+class SearchSong(APIView):
+    def get(self, request, format=None):
+        query = request.GET.get('q')
+        session_id = self.request.session.session_key
+        if not is_spotify_authenticated(session_id):
+            return Response({'message': 'User is not authenticated'}, status=status.HTTP_403_FORBIDDEN)
+        
+        tokens = get_user_tokens(session_id)
+        headers = {
+            'Authorization': f'Bearer {tokens.access_token}',
+            'Content-Type': 'application/json',
+        }
+        response = requests.get(f'https://api.spotify.com/v1/search?q={query}&type=track', headers=headers)
+        return JsonResponse(response.json())
+    
+    
+class AddToPlaylist(APIView):
+    def post(self, request, format=None):
+        session_id = self.request.session.session_key
+        if not is_spotify_authenticated(session_id):
+            return Response({'message': 'User is not authenticated'}, status=status.HTTP_403_FORBIDDEN)
+         
+        tokens = get_user_tokens(session_id)
+        track_uri = request.data.get('trackUri')
+        playlist_id = 'Spotify_id'
+        
+        headers = {
+            'Authorization': f'Bearer {tokens.access_token}',
+            'Content-Type': 'application/json',
+        } 
+        
+        data = {
+            'uris': [track_uri]
+        }
+        response = requests.post(f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks', headers=headers, json=data)
+        return JsonResponse(response.json())
+    

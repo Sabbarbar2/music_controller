@@ -8,14 +8,15 @@ const SearchBar = () => {
   
   const searchSongs = async () => {
     try {
-      const response = await axios.get('/spotify/search/', { params: { query } });
-      setResults(response.data.tracks.items);
-      console.log(query);
+        console.log("Sending search request to backend");
+        const response = await axios.get('/spotify/search/', { params: { query: query } });
+        console.log("Response from backend:");
+        console.log(response.data);
+        setResults(response.data.tracks.items);
     } catch (error) {
-      console.error('Error searching songs', error);
-      console.log(query);
+        console.error('Error searching songs', error);
     }
-  };
+};
 
   const addToQueue = async (song) => {
     const { id, name, artists, album } = song;

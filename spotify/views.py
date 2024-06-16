@@ -179,13 +179,13 @@ class SkipSong(APIView):
     
 class SearchSong(APIView):
     def get(self, request, format=None):
-        session_id = self.request.session.session_key
+        print("SearchSong view called")
         query = request.GET.get('query')
-        
+        print(f"Query parameter: {query}")
         if not query:
             return Response({'message': 'Query parameter is missing'}, status=status.HTTP_400_BAD_REQUEST)
         
-        tokens = get_user_tokens(session_id)
+        tokens = get_user_tokens(request.session.session_key)
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {tokens.access_token}'
@@ -196,6 +196,8 @@ class SearchSong(APIView):
         if response.status_code != 200:
             return Response({'message': 'Error fetching data from Spotify'}, status=status.HTTP_400_BAD_REQUEST)
 
+        print("Response from Spotify API:")
+        print(response.json())
         return Response(response.json(), status=status.HTTP_200_OK)
 
 class AddToQueue(APIView):

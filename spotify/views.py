@@ -181,6 +181,7 @@ class SearchSong(APIView):
     def get(self, request, format=None):
         session_id = self.request.session.session_key
         query = request.GET.get('query')
+        
         if not query:
             return Response({'message': 'Query parameter is missing'}, status=status.HTTP_400_BAD_REQUEST)
         

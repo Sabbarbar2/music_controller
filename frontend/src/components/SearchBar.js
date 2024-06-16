@@ -10,8 +10,10 @@ const SearchBar = () => {
     try {
       const response = await axios.get('/search/', { params: { query } });
       setResults(response.data.tracks.items);
+      console.log(query);
     } catch (error) {
       console.error('Error searching songs', error);
+      console.log(query);
     }
   };
 
@@ -44,8 +46,13 @@ const SearchBar = () => {
       </Button>
       <List>
         {results.map((song) => (
-          <ListItem key={song.id} button onClick={() => addToQueue(song)}>
-            <ListItemText primary={song.name} secondary={song.artists.map(artist => artist.name).join(', ')} />
+          <ListItem key={song.id}>
+            <ListItemButton onClick={() => addToQueue(song)}>
+              <ListItemText 
+                primary={song.name} 
+                secondary={song.artists.map(artist => artist.name).join(', ')} 
+              />
+            </ListItemButton>
           </ListItem>
         ))}
       </List>

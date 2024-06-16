@@ -1,49 +1,51 @@
 import React, { useState } from 'react';
+import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
 import axios from 'axios';
-import { TextField, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@mui/material';
-import AddIcon from '@material-ui/icons/Add';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-
-  const handleSearch = async (event) => {
-    event.preventDefault();
-    if (query) {
-      const response = await axios.get(`/spotify/search?q=${query}`);
+  
+  const searchSongs = async () => {
+    try {
+      const response = await axios.get('/search/', { params: { query } });
       setResults(response.data.tracks.items);
+    } catch (error) {
+      console.error('Error searching songs', error);
     }
   };
 
-  const handleAddToPlaylist = async (trackUri) => {
-    await axios.post('/spotify/add-to-playlist', { trackUri });
-    alert('Song added to the playlist!');
+  const addToQueue = async (song) => {
+    const { id, name, artists, album } = song;
+    const songData = {
+      song_id: id,
+      title: name,
+      artist: artists.map(artist => artist.name).join(', '),
+      album_cover: album.images[0].url,
+    };
+    try {
+      await axios.post('/queue/add/', songData);
+      alert('Song added to queue');
+    } catch (error) {
+      console.error('Error adding song to queue', error);
+    }
   };
 
   return (
     <div>
-      <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-        <TextField
-          label="Search for a song..."
-          variant="outlined"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          style={{ marginRight: '10px' }}
-        />
-        <Button variant="contained" color="primary" type="submit">Search</Button>
-      </form>
+      <TextField
+        label="Search Songs"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        fullWidth
+      />
+      <Button variant="contained" color="primary" onClick={searchSongs}>
+        Search
+      </Button>
       <List>
-        {results.map((track) => (
-          <ListItem key={track.id}>
-            <ListItemText
-              primary={track.name}
-              secondary={track.artists.map((artist) => artist.name).join(', ')}
-            />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" color="primary" onClick={() => handleAddToPlaylist(track.uri)}>
-                <AddIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
+        {results.map((song) => (
+          <ListItem key={song.id} button onClick={() => addToQueue(song)}>
+            <ListItemText primary={song.name} secondary={song.artists.map(artist => artist.name).join(', ')} />
           </ListItem>
         ))}
       </List>

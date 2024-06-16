@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from .util import *
 from api.models import Room
-from .models import Vote
+from .models import Vote, SongQueue
 from django.http import JsonResponse
 
 class AuthURL(APIView):
@@ -179,38 +179,37 @@ class SkipSong(APIView):
     
 class SearchSong(APIView):
     def get(self, request, format=None):
-        query = request.GET.get('q')
         session_id = self.request.session.session_key
-        if not is_spotify_authenticated(session_id):
-            return Response({'message': 'User is not authenticated'}, status=status.HTTP_403_FORBIDDEN)
+        query = request.GET.get('query')
+        if not query:
+            return Response({'message': 'Query parameter is missing'}, status=status.HTTP_400_BAD_REQUEST)
         
         tokens = get_user_tokens(session_id)
         headers = {
-            'Authorization': f'Bearer {tokens.access_token}',
             'Content-Type': 'application/json',
+            'Authorization': f'Bearer {tokens.access_token}'
         }
-        response = requests.get(f'https://api.spotify.com/v1/search?q={query}&type=track', headers=headers)
-        return JsonResponse(response.json())
-    
-    
-class AddToPlaylist(APIView):
+        url = f"https://api.spotify.com/v1/search?q={query}&type=track"
+        response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            return Response({'message': 'Error fetching data from Spotify'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(response.json(), status=status.HTTP_200_OK)
+
+class AddToQueue(APIView):
     def post(self, request, format=None):
-        session_id = self.request.session.session_key
-        if not is_spotify_authenticated(session_id):
-            return Response({'message': 'User is not authenticated'}, status=status.HTTP_403_FORBIDDEN)
-         
-        tokens = get_user_tokens(session_id)
-        track_uri = request.data.get('trackUri')
-        playlist_id = 'Spotify_id'
+        room_code = self.request.session.get('room_code')
+        song_id = request.data.get('song_id')
+        title = request.data.get('title')
+        artist = request.data.get('artist')
+        album_cover = request.data.get('album_cover')
         
-        headers = {
-            'Authorization': f'Bearer {tokens.access_token}',
-            'Content-Type': 'application/json',
-        } 
+        if not room_code or not song_id:
+            return Response({'message': 'Missing required parameters'}, status=status.HTTP_400_BAD_REQUEST)
         
-        data = {
-            'uris': [track_uri]
-        }
-        response = requests.post(f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks', headers=headers, json=data)
-        return JsonResponse(response.json())
-    
+        room = Room.objects.get(code=room_code)
+        song = SongQueue(room=room, song_id=song_id, title=title, artist=artist, album_cover=album_cover)
+        song.save()
+
+        return Response({'message': 'Song added to queue'}, status=status.HTTP_201_CREATED)

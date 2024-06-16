@@ -16,3 +16,14 @@ class Vote(models.Model):
     song_id = models.CharField(max_length=50)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     
+    
+class SongQueue(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    song_id = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
+    artist = models.CharField(max_length=200)
+    album_cover = models.CharField(max_length=500)
+
+    def __str__(self):
+        return self.title
+    

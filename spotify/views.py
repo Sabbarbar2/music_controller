@@ -191,13 +191,13 @@ class SearchSong(APIView):
             'Authorization': f'Bearer {tokens.access_token}'
         }
         url = f"https://api.spotify.com/v1/search?q={query}&type=track"
-        response = requests.get(url, headers=headers)
-
-        if response.status_code != 200:
-            return Response({'message': 'Error fetching data from Spotify'}, status=status.HTTP_400_BAD_REQUEST)
-
-        print("Response from Spotify API:")
-        print(response.json())
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+        except requests.RequestException as e:
+            print(f"Error making Spotify API request: {e}")
+            return Response({'message': 'Error fetching data from Spotify'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
         return Response(response.json(), status=status.HTTP_200_OK)
 
 class AddToQueue(APIView):

@@ -8,7 +8,7 @@ const SearchBar = () => {
   
   const searchSongs = async () => {
     try {
-      const response = await axios.get('/search/', { params: { query } });
+      const response = await axios.get('/spotify/search/', { params: { query } });
       setResults(response.data.tracks.items);
       console.log(query);
     } catch (error) {

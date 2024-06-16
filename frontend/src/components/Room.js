@@ -129,8 +129,12 @@ function Room({ leaveRoomCallback }) {
                     Code: {roomCode}
                 </Typography>
             </Grid>
-            <SearchBar />
-            <MusicPlayer {...song} />
+            <Grid item xs={12} align="center">
+                <SearchBar />
+            </Grid>
+            <Grid item xs={12} align="center">
+                <MusicPlayer {...song} />
+            </Grid>
             {roomData.isHost ? renderSettingsButton() : null}
             <Grid item xs={12} align="center">
                 <Button color="secondary" variant="contained" onClick={leaveButtonPressed}>

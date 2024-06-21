@@ -10,6 +10,7 @@ def get_user_tokens(session_id):
     user_tokens = SpotifyToken.objects.filter(user=session_id)
     print(user_tokens)
     if user_tokens.exists():
+        print(user_tokens[0].access_token)
         return user_tokens[0]
     else:
         return None

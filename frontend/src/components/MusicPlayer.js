@@ -9,9 +9,12 @@ import {
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
 import SkipNextIcon from "@material-ui/icons/SkipNext";
+import { useQueue } from "./QueueManager";
 
 function MusicPlayer(props) {
   const { time, duration, image_url, title, artist, is_playing, votes, votes_required } = props;
+  const { fetchQueue } = useQueue();
+
 
   const songProgress = (time / duration) * 100;
 
@@ -58,6 +61,7 @@ function MusicPlayer(props) {
             if (!response.ok) {
                 throw new Error(`HTTP Error! Status: ${response.status}`);
             }
+            fetchQueue(); // Refresh the queue
             console.dir(response);
         })
         .catch(error => console.error("Error skipping song:", error));
@@ -68,10 +72,10 @@ function MusicPlayer(props) {
   return (
     <Card>
       <Grid container spacing={1} alignItems="center">
-        <Grid item align="center" xs={12}>
+        <Grid item align="center" xs={4}>
           <img src={image_url} height="100%" width="100%" alt="Album Cover" />
         </Grid>
-        <Grid item align="center" xs={12}>
+        <Grid item align="center" xs={8}>
           <Typography component="h5" variant="h5">
             {title}
           </Typography>
